@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bentley Custom Keyboard</string>
+    <string name="keyboard_name">Bentley Custom Keyboard</string>
+    <string name="keyboard_english">English (US)</string>
+    <string name="settings_title">Keyboard settings</string>
+    <string name="settings_description">Customize the keyboard used for text entry.</string>
+    <string name="dark_theme">Use dark keyboard theme</string>
+    <string name="vibration">Vibrate on key press</string>
+    <string name="key_height">Key height</string>
+    <string name="enable_keyboard">Enable keyboard in Android settings</string>
+    <string name="choose_keyboard">Choose Bentley Custom Keyboard</string>
+</resources>
