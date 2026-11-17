@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable
 import android.inputmethodservice.InputMethodService
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.inputmethod.InputConnection
 import android.widget.HorizontalScrollView
@@ -84,12 +85,23 @@ class BentleyKeyboardService : InputMethodService() {
                 setStroke(dp(1), if (dark) 0xFF465366.toInt() else 0xFFC4CCD6.toInt())
             }
             isFocusable = false
-            setOnClickListener { action() }
+            setOnClickListener {
+                if (prefs.getBoolean("vibration", false)) performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                action()
+            }
         }
     }
 
     private fun pressSymbol(key: String) {
-        if (key == "⌫") { sendCode(KeyEvent.KEYCODE_DEL); return }
+        if (fn && key in listOf("1","2","3","4","5","6","7","8","9","0")) {
+            val number = if (key == "0") 10 else key.toInt()
+            sendFunction("F$number")
+            return
+        }
+        if (key == "⌫") {
+            sendCode(if (fn) KeyEvent.KEYCODE_FORWARD_DEL else KeyEvent.KEYCODE_DEL)
+            return
+        }
         val shifted = shift
         val value = when (key) {
             "\u0060" -> if (shifted) "~" else "\u0060"
@@ -122,10 +134,10 @@ class BentleyKeyboardService : InputMethodService() {
             "Tab" -> sendCode(KeyEvent.KEYCODE_TAB)
             "Enter" -> sendCode(KeyEvent.KEYCODE_ENTER)
             "⌫" -> sendCode(KeyEvent.KEYCODE_DEL)
-            "←" -> sendCode(KeyEvent.KEYCODE_DPAD_LEFT)
-            "→" -> sendCode(KeyEvent.KEYCODE_DPAD_RIGHT)
-            "↑" -> sendCode(KeyEvent.KEYCODE_DPAD_UP)
-            "↓" -> sendCode(KeyEvent.KEYCODE_DPAD_DOWN)
+            "←" -> sendCode(if (fn) KeyEvent.KEYCODE_MOVE_HOME else KeyEvent.KEYCODE_DPAD_LEFT)
+            "→" -> sendCode(if (fn) KeyEvent.KEYCODE_MOVE_END else KeyEvent.KEYCODE_DPAD_RIGHT)
+            "↑" -> sendCode(if (fn) KeyEvent.KEYCODE_PAGE_UP else KeyEvent.KEYCODE_DPAD_UP)
+            "↓" -> sendCode(if (fn) KeyEvent.KEYCODE_PAGE_DOWN else KeyEvent.KEYCODE_DPAD_DOWN)
             "Ins" -> sendCode(KeyEvent.KEYCODE_INSERT)
             "Home" -> sendCode(KeyEvent.KEYCODE_MOVE_HOME)
             "End" -> sendCode(KeyEvent.KEYCODE_MOVE_END)
@@ -163,6 +175,7 @@ class BentleyKeyboardService : InputMethodService() {
         ic.sendKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, code, 0, meta))
         ic.sendKeyEvent(KeyEvent(now, android.os.SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, code, 0, meta))
         if (shift) shift = false
+        if (fn) fn = false
         rebuild()
     }
 
